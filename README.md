@@ -1,9 +1,9 @@
 [![Build Status](https://travis-ci.org/mikaelkaron/grunt-git-describe.png)](https://travis-ci.org/mikaelkaron/grunt-git-describe)
 [![NPM version](https://badge.fury.io/js/grunt-git-describe.png)](http://badge.fury.io/js/grunt-git-describe)
 
-# grunt-git-describe
+# grunt-git-describe-plus
 
-> Describes git commit
+> Describes git commit and push status. Based on grunt-git-describe with addition to detect if locally unpushed changes exist.
 
 ## Getting Started
 This plugin requires Grunt `~0.4.0`
@@ -11,13 +11,13 @@ This plugin requires Grunt `~0.4.0`
 If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:
 
 ```shell
-npm install grunt-git-describe --save-dev
+npm install grunt-git-describe-plus --save-dev
 ```
 
 One the plugin has been installed, it may be enabled inside your Gruntfile with this line of JavaScript:
 
 ```js
-grunt.loadNpmTasks('grunt-git-describe');
+grunt.loadNpmTasks('grunt-git-describe-plus');
 ```
 
 ## The "git-describe" task
@@ -86,6 +86,7 @@ grunt.event.once('git-describe', function (rev) {
   grunt.log.writeln("Git rev since: " + rev.since);
   grunt.log.writeln("Git rev object: " + rev.object); // The 6 character commit SHA by itself
   grunt.log.writeln("Git rev dirty: " + rev.dirty);   // A flag denoting whether all local changes are committed
+  grunt.log.writeln("Git rev unpushed: " + rev.unpushed);   // A flag denoting whether there are unpushed local changes
 });
 ```
 

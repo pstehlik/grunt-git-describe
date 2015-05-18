@@ -1,11 +1,11 @@
 {
-  "name": "grunt-git-describe",
-  "description": "Describes git commit",
+  "name": "grunt-git-describe-plus",
+  "description": "Describes git commit and push status",
   "version": "2.3.3-0",
-  "homepage": "https://github.com/mikaelkaron/grunt-git-describe",
+  "homepage": "https://github.com/pstehlik/grunt-git-describe",
   "author": {
-    "name": "Mikael Karon",
-    "email": "mikael@karon.se"
+    "name": "Philip Stehlik (Based on Mikael Karon's plugin)",
+    "email": "p@pstehlik.com - mikael@karon.se"
   },
   "repository": {
     "type": "git",

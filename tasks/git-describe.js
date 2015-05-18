@@ -15,6 +15,7 @@ module.exports = function (grunt) {
 	var _spawn = require("grunt-util-spawn")(grunt);
 	var _args = require("grunt-util-args")(grunt);
 	var RE =/(?:(.*)-(\d+)-g)?([a-fA-F0-9]{7})(-dirty)?$/;
+	var RE_STATUS = /use "git push" to publish your local commits/;
 	var GIT_DESCRIBE = "git-describe";
 	var CWD = "cwd";
 	var COMMITISH = "commitish";
@@ -24,7 +25,7 @@ module.exports = function (grunt) {
 	// Initial OPTIONS
 	var OPTIONS = {};
 	OPTIONS[CWD] = ".";
-	OPTIONS[TEMPLATE] = "{%=tag%}-{%=since%}-{%=object%}{%=dirty%}";
+	OPTIONS[TEMPLATE] = "{%=tag%}-{%=since%}-{%=object%}{%=dirty%}{%=unpushed%}";
 	OPTIONS[FAIL_ON_ERROR] = true;
 
 	// Add GIT_DESCRIBE delimiters
@@ -44,6 +45,9 @@ module.exports = function (grunt) {
 
 		// Log flags (if verbose)
 		grunt.log.verbose.writeflags(options);
+
+		//accessible return data for separate calls to git
+		var matches;
 
 		// Spawn git
 		_spawn({
@@ -70,7 +74,7 @@ module.exports = function (grunt) {
 			}
 
 			// Get matches
-			var matches = result.toString().match(RE);
+			matches = result.toString().match(RE);	
 
 			// If we did not match...
 			if (matches === null) {
@@ -148,15 +152,60 @@ module.exports = function (grunt) {
 					}
 				}
 			});
+		
+			//now check if there are unpushed local commits
+			_spawn({
+				"cmd" : "git",
+				"args" : [ "status"]
+			}, function (err, result) {
+				// If an error occurred...
+				if (err) {
+					// ... and we consider this case fatal
+					if (options[FAIL_ON_ERROR]) {
+						// Signal done with error
+						done(err);
+					} else {
+						// Log the problem and signal done
+						grunt.log.error(err).verbose.error(result);
+						done();
+					}
 
-			// Emit
-			grunt.event.emit(GIT_DESCRIBE, matches, options);
+					// Make sure we don't continue
+					return;
+				}
+				
+				// Get matches
+				var matches_status = result.toString().match(RE_STATUS);
 
-			// Log
-			grunt.log.ok(matches);
+				var thereIsUnpushedStuff = true;
+				// If we did not match...
+				if (matches_status === null) {
+					thereIsUnpushedStuff = false;
+				}
 
-			// Done
-			done();
+				// Define extended properties on `matches`
+				Object.defineProperties(matches, {
+					"unpushed" : {
+						"enumerable" : true,
+						"get" : function () {
+							return thereIsUnpushedStuff;
+						},
+						"set" : function (value) {
+							thereIsUnpushedStuff = value;
+						}
+					}
+				});
+				
+				// Emit
+				grunt.event.emit(GIT_DESCRIBE, matches, options);
+
+				// Log
+				grunt.log.ok(matches);
+
+				// Done
+				done();
+				
+			});
 		});
 	});
 };
